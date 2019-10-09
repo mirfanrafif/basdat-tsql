@@ -1,0 +1,1 @@
+select distinct custid from Sales.CustOrders;
