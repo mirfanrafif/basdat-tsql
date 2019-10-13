@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2012                    */
-/* Created on:     10/14/2019 6:52:55 AM                        */
+/* Created on:     10/14/2019 6:55:26 AM                        */
 /*==============================================================*/
 
 
@@ -261,6 +261,7 @@ create table PENJAGA (
    PHONE                varchar(1024)        null,
    EMAIL                varchar(1024)        null,
    PASSWORD             varchar(1024)        null,
+   SALDO                int                  not null,
    constraint PK_PENJAGA primary key nonclustered (ID_PENJAGA)
 )
 go
@@ -322,6 +323,7 @@ create table "USER" (
    PHONE                varchar(1024)        null,
    EMAIL                varchar(1024)        null,
    PASSWORD             varchar(1024)        null,
+   SALDO                int                  not null,
    constraint PK_USER primary key nonclustered (ID_USER)
 )
 go
