@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2012                    */
-/* Created on:     10/10/2019 3:19:55 AM                        */
+/* Created on:     10/14/2019 5:58:04 AM                        */
 /*==============================================================*/
 
 
@@ -34,16 +34,16 @@ go
 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('PENCAIRAN') and o.name = 'FK_PENCAIRA_PENCAIRAN_BANK')
-alter table PENCAIRAN
-   drop constraint FK_PENCAIRA_PENCAIRAN_BANK
+   where r.fkeyid = object_id('PENARIKAN') and o.name = 'FK_PENARIKA_PENARIKAN_PENJAGA')
+alter table PENARIKAN
+   drop constraint FK_PENARIKA_PENARIKAN_PENJAGA
 go
 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('PENCAIRAN') and o.name = 'FK_PENCAIRA_PENCAIRAN_USER')
-alter table PENCAIRAN
-   drop constraint FK_PENCAIRA_PENCAIRAN_USER
+   where r.fkeyid = object_id('PENARIKAN') and o.name = 'FK_PENARIKA_PENARIKAN_BANK')
+alter table PENARIKAN
+   drop constraint FK_PENARIKA_PENARIKAN_BANK
 go
 
 if exists (select 1
@@ -51,6 +51,20 @@ if exists (select 1
    where r.fkeyid = object_id('PENJAGA') and o.name = 'FK_PENJAGA_ALAMAT_JA_TEMPAT')
 alter table PENJAGA
    drop constraint FK_PENJAGA_ALAMAT_JA_TEMPAT
+go
+
+if exists (select 1
+   from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
+   where r.fkeyid = object_id('TOPUP') and o.name = 'FK_TOPUP_PENCAIRAN_BANK')
+alter table TOPUP
+   drop constraint FK_TOPUP_PENCAIRAN_BANK
+go
+
+if exists (select 1
+   from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
+   where r.fkeyid = object_id('TOPUP') and o.name = 'FK_TOPUP_PENCAIRAN_USER')
+alter table TOPUP
+   drop constraint FK_TOPUP_PENCAIRAN_USER
 go
 
 if exists (select 1
@@ -118,28 +132,10 @@ if exists (select 1
 go
 
 if exists (select 1
-            from  sysindexes
-           where  id    = object_id('PENCAIRAN')
-            and   name  = 'PENCAIRAN2_FK'
-            and   indid > 0
-            and   indid < 255)
-   drop index PENCAIRAN.PENCAIRAN2_FK
-go
-
-if exists (select 1
-            from  sysindexes
-           where  id    = object_id('PENCAIRAN')
-            and   name  = 'PENCAIRAN_FK'
-            and   indid > 0
-            and   indid < 255)
-   drop index PENCAIRAN.PENCAIRAN_FK
-go
-
-if exists (select 1
             from  sysobjects
-           where  id = object_id('PENCAIRAN')
+           where  id = object_id('PENARIKAN')
             and   type = 'U')
-   drop table PENCAIRAN
+   drop table PENARIKAN
 go
 
 if exists (select 1
@@ -166,6 +162,31 @@ if exists (select 1
 go
 
 if exists (select 1
+            from  sysindexes
+           where  id    = object_id('TOPUP')
+            and   name  = 'PENCAIRAN2_FK'
+            and   indid > 0
+            and   indid < 255)
+   drop index TOPUP.PENCAIRAN2_FK
+go
+
+if exists (select 1
+            from  sysindexes
+           where  id    = object_id('TOPUP')
+            and   name  = 'PENCAIRAN_FK'
+            and   indid > 0
+            and   indid < 255)
+   drop index TOPUP.PENCAIRAN_FK
+go
+
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('TOPUP')
+            and   type = 'U')
+   drop table TOPUP
+go
+
+if exists (select 1
             from  sysobjects
            where  id = object_id('"USER"')
             and   type = 'U')
@@ -189,7 +210,7 @@ go
 create table KATEGORI (
    ID_KATEGORI          int                  not null,
    NAMA_KAKTEGORI       varchar(1024)        not null,
-   HARGA                varchar(1024)        not null,
+   HARGA                int                  not null,
    constraint PK_KATEGORI primary key nonclustered (ID_KATEGORI)
 )
 go
@@ -253,30 +274,14 @@ ID_PENJAGA ASC
 go
 
 /*==============================================================*/
-/* Table: PENCAIRAN                                             */
+/* Table: PENARIKAN                                             */
 /*==============================================================*/
-create table PENCAIRAN (
+create table PENARIKAN (
    ID_TRANSAKSI         int                  not null,
-   ID_BANK              int                  not null,
-   ID_USER              int                  not null,
+   ID_PENJAGA           int                  null,
+   ID_BANK              int                  null,
    TANGGAL              datetime             not null,
-   constraint PK_PENCAIRAN primary key (ID_TRANSAKSI)
-)
-go
-
-/*==============================================================*/
-/* Index: PENCAIRAN_FK                                          */
-/*==============================================================*/
-create index PENCAIRAN_FK on PENCAIRAN (
-ID_BANK ASC
-)
-go
-
-/*==============================================================*/
-/* Index: PENCAIRAN2_FK                                         */
-/*==============================================================*/
-create index PENCAIRAN2_FK on PENCAIRAN (
-ID_USER ASC
+   constraint PK_PENARIKAN primary key (ID_TRANSAKSI)
 )
 go
 
@@ -315,6 +320,34 @@ create table TEMPAT (
 go
 
 /*==============================================================*/
+/* Table: TOPUP                                                 */
+/*==============================================================*/
+create table TOPUP (
+   ID_TRANSAKSI         int                  not null,
+   ID_BANK              int                  not null,
+   ID_USER              int                  not null,
+   TANGGAL              datetime             not null,
+   constraint PK_TOPUP primary key (ID_TRANSAKSI)
+)
+go
+
+/*==============================================================*/
+/* Index: PENCAIRAN_FK                                          */
+/*==============================================================*/
+create index PENCAIRAN_FK on TOPUP (
+ID_BANK ASC
+)
+go
+
+/*==============================================================*/
+/* Index: PENCAIRAN2_FK                                         */
+/*==============================================================*/
+create index PENCAIRAN2_FK on TOPUP (
+ID_USER ASC
+)
+go
+
+/*==============================================================*/
 /* Table: "USER"                                                */
 /*==============================================================*/
 create table "USER" (
@@ -347,18 +380,28 @@ alter table PEMBAYARAN
       references PENJAGA (ID_PENJAGA)
 go
 
-alter table PENCAIRAN
-   add constraint FK_PENCAIRA_PENCAIRAN_BANK foreign key (ID_BANK)
-      references BANK (ID_BANK)
+alter table PENARIKAN
+   add constraint FK_PENARIKA_PENARIKAN_PENJAGA foreign key (ID_PENJAGA)
+      references PENJAGA (ID_PENJAGA)
 go
 
-alter table PENCAIRAN
-   add constraint FK_PENCAIRA_PENCAIRAN_USER foreign key (ID_USER)
-      references "USER" (ID_USER)
+alter table PENARIKAN
+   add constraint FK_PENARIKA_PENARIKAN_BANK foreign key (ID_BANK)
+      references BANK (ID_BANK)
 go
 
 alter table PENJAGA
    add constraint FK_PENJAGA_ALAMAT_JA_TEMPAT foreign key (ID_TEMPAT)
       references TEMPAT (ID_TEMPAT)
+go
+
+alter table TOPUP
+   add constraint FK_TOPUP_PENCAIRAN_BANK foreign key (ID_BANK)
+      references BANK (ID_BANK)
+go
+
+alter table TOPUP
+   add constraint FK_TOPUP_PENCAIRAN_USER foreign key (ID_USER)
+      references "USER" (ID_USER)
 go
 
