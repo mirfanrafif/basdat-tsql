@@ -128,10 +128,40 @@ GROUPING SETS((country, city), country, city, ())
 
 --Soal no. 12
 SELECT
-YEAR(orderdate) as orderyear,
-MONTH(orderdate) as ordermonth,
-DAY(orderdate) as orderday,
-SUM(val) as salesvalue
+    YEAR(orderdate) as orderyear,
+    MONTH(orderdate) as ordermonth,
+    DAY(orderdate) as orderday,
+    SUM(val) as salesvalue
 FROM Sales.OrderValues
-GROUP BY
-GROUPING SETS((YEAR(orderdate), ))
+GROUP BY CUBE(
+    YEAR(orderdate), 
+    MONTH(orderdate), 
+    DAY(orderdate)
+    )
+
+--Soal no. 13
+SELECT
+    YEAR(orderdate) as orderyear,
+    MONTH(orderdate) as ordermonth,
+    DAY(orderdate) as orderday,
+    SUM(val) as salesvalue
+FROM Sales.OrderValues
+GROUP BY ROLLUP(
+    YEAR(orderdate), 
+    MONTH(orderdate), 
+    DAY(orderdate)
+    )
+
+--Soal no. 14
+--Lebih cocok menggunakan rollup karena hasil yang dikeluarkan lebih tertata dengan baik, pengelompokan berdasarkan tanggal, bulan lalu tahun
+
+--Soal no. 15
+SELECT GROUPING_ID (YEAR(orderdate), MONTH(orderdate)) AS groupid,
+    YEAR(orderdate) AS orderyear,
+    MONTH(orderdate) AS ordermonth,
+    SUM(val) AS salesvalue
+FROM
+    Sales.OrderValues
+GROUP BY 
+	ROLLUP (YEAR(orderdate), MONTH(orderdate))
+ORDER BY groupid, orderyear, ordermonth;
