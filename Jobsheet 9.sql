@@ -1,44 +1,137 @@
--- CREATE VIEW Sales.CategoryQtyYear
+-- CREATE VIEW Sales.CustGroups
 -- AS
 -- SELECT
---   c.categoryname as Category,
---   od.qty as qty,
---   YEAR(o.orderdate) as orderyear
--- FROM
--- Production.Categories as c
--- INNER JOIN Production.Products as p on c.categoryid = p.categoryid
--- INNER JOIN Sales.OrderDetails as od on p.productid = od.productid
--- INNER JOIN Sales.Orders as o on od.orderid = o.orderid;
+-- custid, CHOOSE(custid %3 + 1, N'A', N'B', N'C') as custgroup, country
+-- FROM Sales.Customers
 
+--Soal no. 1
 SELECT *
+FROM Sales.CustGroups
+
+
+--Soal no. 2
+SELECT country, [A], [B], [C]
 FROM (
-  SELECT Category, qty, orderyear FROM Sales.CategoryQtyYear
-) as d
-PIVOT (
-  SUM(qty) FOR orderyear IN ([2006], [2007], [2008])
+    SELECT country, custgroup
+    FROM Sales.CustGroups
+)as a
+PIVOT(
+    COUNT(custgroup) FOR custgroup IN ([A], [B], [C])
 ) as pvt
-ORDER BY Category
+;
 
--- CREATE TABLE [Sales].[PivotedCategorySales](
---   [Category] [nvarchar](15) NOT NULL,
---   [2006] [int] NULL,
---   [2007] [int] NULL,
---   [2008] [int] NULL
--- );
--- GO
+-- ALTER VIEW Sales.CustGroups AS
+-- SELECT
+-- custid, 
+-- CHOOSE(custid %3 + 1, N'A', N'B', N'C') as custgroup, 
+-- country, 
+-- city, 
+-- contactname
+-- FROM Sales.Customers
 
-INSERT INTO Sales.PivotedCategorySales (Category, [2006], [2007], [2008])
+--Soal no. 3
+SELECT country, [A], [B], [C]
+FROM (
+    SELECT country, custgroup
+    FROM Sales.CustGroups
+)as a
+PIVOT(
+    COUNT(custgroup) FOR custgroup IN ([A], [B], [C])
+) as pvt
+;
+
+--Soal no. 4
+SELECT country, city, contactname, [A], [B], [C]
+FROM (
+    SELECT *
+    FROM Sales.CustGroups
+)as a
+PIVOT(
+    COUNT(custgroup) FOR custgroup IN ([A], [B], [C])
+) as pvt
+ORDER BY country
+;
+
+--Soal no. 5
+WITH
+    PivotCustGroups
+    AS
+    (
+        SELECT
+            custid, country, custgroup
+        FROM Sales.CustGroups
+    )
+SELECT country, A, B, C
+FROM (
+    SELECT country, custgroup
+    FROM PivotCustGroups
+) as a
+PIVOT(
+    COUNT(custgroup) FOR custgroup IN ([A],[B],[C])
+    ) as pvt
+
+--Soal no. 6
+-- Ya. Karena fungsi CTE dan view hampir sama. namun untuk kecepatan bekerja, saya lebih memilih CTE
+
+--Soal no. 7
+--Menggunakan CTE saat membuat pivot lebih mudah dimodifikasi karena tidak memerlukan alter, tetapi hanya mengganti query cte yang digunakan
+
+--Soal no. 8
+WITH
+    SalesByCategory
+    AS
+    (
+        SELECT
+            o.custid,
+            c.categoryname as category,
+            od.qty * od.unitprice as SalesValue
+        FROM Sales.Orders as o
+            INNER JOIN Sales.OrderDetails as od ON od.orderid = o.orderid
+            INNER JOIN Production.Products as p ON p.productid = od.productid
+            INNER JOIN Production.Categories as c ON c.categoryid = p.categoryid
+        WHERE YEAR(orderdate) = 2008
+    )
 SELECT *
-FROM (
-  SELECT Category, qty, orderyear FROM Sales.CategoryQtyYear
-) as d
+FROM SalesByCategory
 PIVOT (
-  SUM(qty) FOR orderyear IN ([2006], [2007], [2008])
-) as pvt
-ORDER BY Category
+    SUM(SalesValue) FOR category IN (Beverages, Condiments, Confections, [Dairy Products], [Grains/Cereals], [Meat/Poultry], Produce, Seafood)
+) as p
+ORDER BY custid
 
-SELECT * FROM Sales.PivotedCategorySales
+--Soal no. 9
+-- CREATE VIEW Sales.PivotCustGroups AS
+-- WITH PivotCustGroups AS (
+--     SELECT 
+--     custid,
+--     country,
+--     custgroup
+--     FROM Sales.CustGroups
+-- )
+-- SELECT country, p.A, p.B, p.C FROM PivotCustGroups
+-- PIVOT (COUNT(custid) FOR custgroup IN (A, B, C)) as p;
 
-SELECT Category, qty, orderyear FROM Sales.PivotedCategorySales
-UNPIVOT(qty FOR orderyear in ([2006], [2007], [2008])) as unpvt
+SELECT country, A, B, C
+FROM Sales.PivotCustGroups
+-- PIVOT (COUNT(custid) FOR custgroup IN (A, B, C)) as p;
 
+--Soal no. 10
+SELECT custgroup, country, numberofcustomer
+FROM Sales.PivotCustGroups
+UNPIVOT(numberofcustomer FOR custgroup IN([A], [B], [C])) as p
+
+--Soal no. 11
+SELECT
+    country, city, COUNT(custid) as noofcustomers
+FROM Sales.Customers
+GROUP BY
+GROUPING SETS((country, city), country, city, ())
+
+--Soal no. 12
+SELECT
+YEAR(orderdate) as orderyear,
+MONTH(orderdate) as ordermonth,
+DAY(orderdate) as orderday,
+SUM(val) as salesvalue
+FROM Sales.OrderValues
+GROUP BY
+GROUPING SETS((YEAR(orderdate), ))
