@@ -1,0 +1,13 @@
+{
+  "sqltools.connections": [
+    {
+      "database": "TSQL",
+      "dialect": "MSSQL",
+      "name": "TSQL",
+      "password": "Aremania87",
+      "port": 1433,
+      "server": "localhost",
+      "username": "SA"
+    }
+  ]
+}
